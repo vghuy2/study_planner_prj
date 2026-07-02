@@ -4,6 +4,7 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // ─── Authenticated Routes ───────────────────────────────────────────────
     {
       path: '/',
       name: 'dashboard',
@@ -23,12 +24,43 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/statistics',
-      name: 'statistics',
-      // Temporary fallback if Statistics page isn't ready
-      component: () => import('@/features/dashboard/Dashboard.vue').catch(() => {}),
+      path: '/pomodoro',
+      name: 'pomodoro',
+      component: () => import('@/features/pomodoro/views/Pomodoro.vue'),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/statistics',
+      name: 'statistics',
+      component: () => import('@/features/statistics/Statistics.vue'),
+      meta: { requiresAuth: true }
+    },
+    // Placeholder routes (sidebar links — pages to be built later)
+    {
+      path: '/goals',
+      name: 'goals',
+      component: () => import('@/features/dashboard/Dashboard.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/study-plans',
+      name: 'study-plans',
+      component: () => import('@/features/dashboard/Dashboard.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/features/dashboard/Dashboard.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/features/dashboard/Dashboard.vue'),
+      meta: { requiresAuth: true }
+    },
+    // ─── Guest Routes ────────────────────────────────────────────────────────
     {
       path: '/login',
       name: 'login',
@@ -41,21 +73,20 @@ const router = createRouter({
       component: () => import('@/features/auth/views/Register.vue'),
       meta: { requiresGuest: true }
     }
-  ],
+  ]
 })
 
-// Route Guards
-router.beforeEach((to, from, next) => {
-  // We initialize the store INSIDE the guard to ensure Pinia is initialized by Vue first
+// Route Guards — return-value pattern (Vue Router 5, next() is deprecated)
+router.beforeEach((to) => {
   const authStore = useAuthStore()
-  
+
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login' })
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'dashboard' })
-  } else {
-    next()
+    return { name: 'login' }
   }
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
+  return true
 })
 
 export default router
