@@ -15,6 +15,7 @@ export const taskService = {
     const all = storageService.get(TASKS_KEY) || []
     const task = {
       id: uuidv4(),
+      studyPlanId: data.studyPlanId || null,
       userId,
       title: data.title?.trim() || '',
       subject: data.subject?.trim() || '',

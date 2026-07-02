@@ -7,12 +7,17 @@ import {
 import { toast } from 'vue-sonner'
 import dayjs from 'dayjs'
 import { useTaskStore } from './stores/task.store'
+import { useStudyPlanStore } from '@/features/study-plans/stores/study-plan.store'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 
 const taskStore = useTaskStore()
-onMounted(() => taskStore.fetchTasks())
+const studyPlanStore = useStudyPlanStore()
+onMounted(() => {
+  taskStore.fetchTasks()
+  studyPlanStore.fetchStudyPlans()
+})
 
 // ─── Filter State ─────────────────────────────────────────────────────────────
 const activeFilter = ref('all')
@@ -52,7 +57,7 @@ const editingTaskId  = ref(null)
 const isSubmitting   = ref(false)
 
 const INITIAL_FORM = () => ({
-  title: '', subject: '', description: '',
+  studyPlanId: '', title: '', subject: '', description: '',
   priority: 'medium', dueDate: ''
 })
 const form       = ref(INITIAL_FORM())
@@ -77,6 +82,7 @@ function openEditModal(task) {
   isEditing.value     = true
   editingTaskId.value = task.id
   form.value = {
+    studyPlanId: task.studyPlanId || '',
     title:       task.title,
     subject:     task.subject || '',
     description: task.description || '',
@@ -90,6 +96,9 @@ function openEditModal(task) {
 function validate() {
   const errors = {}
   if (!form.value.title.trim()) errors.title = 'Title is required'
+  if (!form.value.subject.trim()) errors.subject = 'Subject is required'
+  if (!form.value.priority) errors.priority = 'Priority is required'
+  if (!form.value.dueDate) errors.dueDate = 'Deadline is required'
   formErrors.value = errors
   return !Object.keys(errors).length
 }
@@ -315,16 +324,33 @@ function dueDateMeta(date) {
           placeholder="What do you need to study?"
         />
 
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Study Plan (Optional)</label>
+          <select
+            v-model="form.studyPlanId"
+            class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white text-sm"
+          >
+            <option value="">No Study Plan</option>
+            <option v-for="sp in studyPlanStore.studyPlans" :key="sp.id" :value="sp.id">
+              {{ sp.title }}
+            </option>
+          </select>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Subject</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Subject *</label>
             <select
               v-model="form.subject"
               class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white text-sm"
+              :class="{ 'border-red-500 ring-red-500': formErrors.subject }"
             >
               <option value="">Select subject</option>
               <option v-for="s in SUBJECTS" :key="s" :value="s">{{ s }}</option>
             </select>
+            <p v-if="formErrors.subject" class="mt-1.5 text-xs font-medium text-red-500 ml-1">
+              {{ formErrors.subject }}
+            </p>
           </div>
 
           <div>
@@ -341,12 +367,16 @@ function dueDateMeta(date) {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Due Date</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Due Date *</label>
           <input
             v-model="form.dueDate"
             type="date"
             class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-800 text-gray-900 dark:text-white text-sm"
+            :class="{ 'border-red-500 ring-red-500': formErrors.dueDate }"
           />
+          <p v-if="formErrors.dueDate" class="mt-1.5 text-xs font-medium text-red-500 ml-1">
+            {{ formErrors.dueDate }}
+          </p>
         </div>
 
         <div>
