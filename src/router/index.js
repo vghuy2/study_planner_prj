@@ -39,13 +39,13 @@ const router = createRouter({
     {
       path: '/goals',
       name: 'goals',
-      component: () => import('@/features/dashboard/Dashboard.vue'),
+      component: () => import('@/features/goals/Goals.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/study-plans',
       name: 'study-plans',
-      component: () => import('@/features/dashboard/Dashboard.vue'),
+      component: () => import('@/features/study-plans/StudyPlans.vue'),
       meta: { requiresAuth: true }
     },
     {
