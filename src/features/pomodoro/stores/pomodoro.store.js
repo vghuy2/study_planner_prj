@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { storageService } from '@/services/storage.service'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useNotificationStore } from '@/features/notifications/stores/notification.store'
 import { v4 as uuidv4 } from 'uuid'
 import dayjs from 'dayjs'
 
@@ -84,6 +85,11 @@ export const usePomodoroStore = defineStore('pomodoro', () => {
     if (mode.value === 'focus') {
       sessionCount.value++
       _saveSession()
+      // Notify focus done
+      useNotificationStore().notifyPomodoroDone(sessionCount.value)
+    } else {
+      // Notify break done
+      useNotificationStore().notifyPomodoroBreakDone()
     }
     _autoNextMode()
   }

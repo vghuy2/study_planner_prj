@@ -74,6 +74,58 @@ export const AuthService = {
         return storageService.get(CURRENT_USER_KEY);
     },
 
+    // Update Profile
+    async updateProfile(data) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const currentUser = storageService.get(CURRENT_USER_KEY);
+                if (!currentUser) return reject(new Error('No authenticated user.'));
+
+                const users = storageService.get(USERS_KEY) || [];
+                const idx = users.findIndex(u => u.id === currentUser.id);
+                if (idx === -1) return reject(new Error('User not found.'));
+
+                // Only allow safe fields to be updated
+                const allowedFields = ['fullName'];
+                const updates = {};
+                for (const key of allowedFields) {
+                    if (data[key] !== undefined) updates[key] = data[key];
+                }
+
+                users[idx] = { ...users[idx], ...updates };
+                storageService.set(USERS_KEY, users);
+
+                const { password, ...updatedUser } = users[idx];
+                storageService.set(CURRENT_USER_KEY, updatedUser);
+
+                resolve(updatedUser);
+            }, 400);
+        });
+    },
+
+    // Change Password
+    async changePassword(currentPassword, newPassword) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const currentUser = storageService.get(CURRENT_USER_KEY);
+                if (!currentUser) return reject(new Error('No authenticated user.'));
+
+                const users = storageService.get(USERS_KEY) || [];
+                const idx = users.findIndex(u => u.id === currentUser.id);
+                if (idx === -1) return reject(new Error('User not found.'));
+
+                if (users[idx].password !== currentPassword) {
+                    return reject(new Error('Current password is incorrect.'));
+                }
+
+                users[idx] = { ...users[idx], password: newPassword };
+                storageService.set(USERS_KEY, users);
+
+                resolve();
+            }, 400);
+        });
+    },
+
     // Logout
     async logout() {
         return new Promise(resolve => {

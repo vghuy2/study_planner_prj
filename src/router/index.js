@@ -51,13 +51,13 @@ const router = createRouter({
     {
       path: '/profile',
       name: 'profile',
-      component: () => import('@/features/dashboard/Dashboard.vue'),
+      component: () => import('@/features/profile/views/Profile.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/settings',
       name: 'settings',
-      component: () => import('@/features/dashboard/Dashboard.vue'),
+      component: () => import('@/features/settings/views/Settings.vue'),
       meta: { requiresAuth: true }
     },
     // ─── Guest Routes ────────────────────────────────────────────────────────

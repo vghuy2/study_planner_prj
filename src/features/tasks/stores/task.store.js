@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { taskService } from '../services/task.service'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useNotificationStore } from '@/features/notifications/stores/notification.store'
 import dayjs from 'dayjs'
 
 export const useTaskStore = defineStore('tasks', () => {
@@ -41,6 +42,10 @@ export const useTaskStore = defineStore('tasks', () => {
     if (updated) {
       const idx = tasks.value.findIndex(t => t.id === id)
       if (idx !== -1) tasks.value[idx] = { ...tasks.value[idx], ...updated }
+      // Fire notification when task is marked completed
+      if (updated.status === 'completed') {
+        useNotificationStore().notifyTaskCompleted(updated.title)
+      }
     }
   }
 
