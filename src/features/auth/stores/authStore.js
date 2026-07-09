@@ -29,11 +29,23 @@ export const useAuthStore = defineStore('auth', () => {
         currentUser.value = null;
     };
 
+    const updateProfile = async (data) => {
+        const updatedUser = await AuthService.updateProfile(data);
+        currentUser.value = updatedUser;
+        return updatedUser;
+    };
+
+    const changePassword = async (currentPassword, newPassword) => {
+        await AuthService.changePassword(currentPassword, newPassword);
+    };
+
     return {
         currentUser,
         isAuthenticated,
         register,
         login,
-        logout
+        logout,
+        updateProfile,
+        changePassword
     };
 });
